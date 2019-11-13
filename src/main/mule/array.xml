@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="153e3d07-3c83-4341-942f-f95a03ef0a64" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="arrayFlow" doc:id="c48432ca-c523-4c94-8fb6-e8f27bb57b56" >
+		<scheduler doc:name="Scheduler" doc:id="019f3dd3-8f98-4ce9-9be6-615f5ec4006b" >
+			<scheduling-strategy >
+				<fixed-frequency timeUnit="DAYS"/>
+			</scheduling-strategy>
+		</scheduler>
+		<set-variable value='#[[10,20,30]]' doc:name="Set Variable" doc:id="cc048121-c7bb-415d-9b68-59845241f4ee" variableName="marks"/>
+		<logger level="INFO" doc:name="Logger" doc:id="9070e1dc-950c-45fc-b078-9380fb718a12" message="#[vars.marks]" />
+		<set-variable doc:name="Set Variable" doc:id="020dc49d-ee72-493f-a182-690e954e43d7" variableName="acc" value='#[[]]'/>
+		<logger level="INFO" doc:name="Logger" doc:id="6b3126d1-6170-4ba4-9a0b-7e2b310d461d" message="#[vars.acc]" />
+		<ee:transform doc:name="Transform Message" doc:id="fcb44861-53ad-4029-a85c-5551caa5c445" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+vars.marks]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<os:store doc:name="Store" doc:id="cd2d7d9a-fdc8-48c5-8e19-6069dd1e87aa" />
+		<foreach doc:name="For Each" doc:id="1068b3b0-4dfa-45c1-8154-c3294ba1d680" >
+			<logger level="INFO" doc:name="Logger" doc:id="4f9fdfa4-bcdc-4b91-801e-ef9aaa5cf8dd" message="#[payload]"/>
+			<set-variable value="#[(vars.acc as Number default 0 )+ payload as Number default 0]" doc:name="Set Variable" doc:id="ae89dc37-ffc9-4bab-bf06-d897bb6df708" variableName="acc"/>
+			<logger level="INFO" doc:name="Logger" doc:id="0a76c5a5-43ee-4b9c-b6da-5e14c37c1d19" message="The value of ACC ::::     ---------------&gt;    #[vars.acc]"/>
+		</foreach>
+		<set-variable value="#[[vars.acc]]" doc:name="Set Variable" doc:id="d8296011-7bf2-468c-be12-a6f60c18988f" variableName="acc"/>
+		<logger level="INFO" doc:name="Logger" doc:id="e4225846-a0a6-46a5-a7a2-f9901a4b034f" message="#[vars.acc]"/>
+	</flow>
+</mule>
